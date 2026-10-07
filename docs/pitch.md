@@ -1,6 +1,6 @@
 # Atelier pitch
 
-Status: draft, October 2026
+Status: accepted, October 2026
 
 ## Problem
 
