@@ -9,7 +9,9 @@ The repository is public. Some configs need secrets (tokens, SSH keys, work cred
 
 ## Decision
 
-No secret is ever committed, encrypted or not. chezmoi templates read secrets from a password manager at apply time through chezmoi's built-in integration. Open question: which password manager.
+No secret is ever committed, encrypted or not. chezmoi templates read secrets from a password manager at apply time through chezmoi's built-in integration.
+
+Which password manager to use is a separate decision, recorded in its own ADR once the secrets Atelier needs are known and before the first template that reads a secret is written.
 
 ## Consequences
 
