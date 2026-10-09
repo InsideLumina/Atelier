@@ -1,2 +1,9 @@
 [tools]
 node = "lts"
+starship = "latest"
+bat = "latest"
+fd = "latest"
+eza = "latest"
+fzf = "latest"
+zoxide = "latest"
+neovim = "latest"

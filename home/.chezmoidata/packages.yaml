@@ -1,3 +1,4 @@
 packages:
   debian:
     - ripgrep
+    - zsh
