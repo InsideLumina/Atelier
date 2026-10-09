@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  debian:
+    runs-on: ubuntu-latest
+    container: debian:stable
+    steps:
+      - name: Install prerequisites
+        run: apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git
+
+      - uses: actions/checkout@v7
+
+      - name: Install chezmoi
+        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+
+      - name: Apply the checked-out source state
+        run: '"$HOME/.local/bin/chezmoi" apply --verbose --source "$GITHUB_WORKSPACE"'
+
+      - name: Smoke check
+        run: |
+          rg --version
+          "$HOME/.local/bin/mise" exec -- node --version
