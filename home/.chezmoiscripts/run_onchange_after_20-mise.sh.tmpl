@@ -1,0 +1,19 @@
+{{- if eq .chezmoi.os "linux" -}}
+{{-   $idLike := "" -}}
+{{-   if hasKey .chezmoi.osRelease "idLike" -}}
+{{-     $idLike = .chezmoi.osRelease.idLike -}}
+{{-   end -}}
+{{-   if or (eq .chezmoi.osRelease.id "debian") (contains "debian" $idLike) -}}
+#!/bin/sh
+set -eu
+
+# Re-run when the mise config changes. config.toml hash: {{ include "dot_config/mise/config.toml" | sha256sum }}
+
+mise="$HOME/.local/bin/mise"
+if [ ! -x "$mise" ]; then
+	# Plain installer on purpose: the shell variants edit rc files that chezmoi owns.
+	curl -fsSL https://mise.run | sh
+fi
+"$mise" install
+{{    end -}}
+{{- end -}}
