@@ -24,3 +24,9 @@ jobs:
         run: |
           rg --version
           "$HOME/.local/bin/mise" exec -- node --version
+
+      - name: Shells find Starship and the shared aliases
+        run: |
+          set -e
+          zsh -i -c 'command -v starship && alias gs'
+          bash -i -c 'command -v starship && alias gs'
