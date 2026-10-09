@@ -1,0 +1,8 @@
+# macOS Finder metadata
+.DS_Store
+
+# Claude Code: personal and generated files
+CLAUDE.local.md
+.claude/settings.local.json
+.claude/reports/
+.claude/skills/
