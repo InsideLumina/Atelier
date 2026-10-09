@@ -1,0 +1,99 @@
+# =============================================================================
+# ~/.zshrc, managed by Lumina Atelier through chezmoi.
+#
+#   ~/.config/shell/common.sh → PATH, mise, environment and aliases shared with bash
+#   ~/.zshrc                  → zsh only, in this order:
+#                 common.sh → history/options → completion → aliases → prompt
+#                 → plugins (autosuggestions → highlighting → substring search)
+#                 → zoxide (its docs ask for the end of the file) → ~/.zshrc.local
+# =============================================================================
+
+# --- Environment -------------------------------------------------------------
+typeset -U path fpath # zsh removes duplicate PATH/fpath entries automatically
+[[ -r ~/.config/shell/common.sh ]] && source ~/.config/shell/common.sh
+
+# --- History -----------------------------------------------------------------
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=100000
+setopt EXTENDED_HISTORY     # timestamp each entry
+setopt SHARE_HISTORY        # live-share between sessions (implies incremental append)
+setopt HIST_IGNORE_ALL_DUPS # keep only the newest copy of a repeated command
+setopt HIST_IGNORE_SPACE    # leading space = not recorded (use for secrets)
+setopt HIST_REDUCE_BLANKS
+setopt HIST_VERIFY          # show !! expansions before running them
+
+# --- Options -----------------------------------------------------------------
+setopt AUTO_CD AUTO_PUSHD PUSHD_IGNORE_DUPS PUSHD_SILENT
+setopt CORRECT INTERACTIVE_COMMENTS EXTENDED_GLOB NO_CASE_GLOB NO_BEEP
+
+# --- Completion ----------------------------------------------------------------
+autoload -Uz compinit && compinit
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*:descriptions' format '%F{cyan}── %d%f'
+
+# --- Aliases (shared ones live in common.sh) ---------------------------------
+alias reload="exec zsh"      # clean restart; safer than re-sourcing
+
+# --- Prompt ------------------------------------------------------------------
+(( $+commands[starship] )) && eval "$(starship init zsh)" # config: ~/.config/starship.toml
+
+# --- Plugins (chezmoi externals) — order is required by the plugins themselves
+_zp="$HOME/.local/share/zsh/plugins"
+
+# 1. Autosuggestions
+if [[ -r $_zp/zsh-autosuggestions/zsh-autosuggestions.zsh ]]; then
+	ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#a4a3ab" # text-secondary: Lumina draws placeholders in secondary text
+	ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+	ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=50
+	source "$_zp/zsh-autosuggestions/zsh-autosuggestions.zsh"
+	# Append (not replace) so the plugin's default clear-widgets are kept
+	ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(history-substring-search-up history-substring-search-down)
+fi
+
+# 2. Syntax highlighting — Lumina dark roles (hyphenated keys, bulk += form).
+#    Violet = something you can run, rose = an error, ink for the rest. Status hues
+#    do not appear here.
+if [[ -r $_zp/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+	typeset -A ZSH_HIGHLIGHT_STYLES
+	ZSH_HIGHLIGHT_STYLES+=(
+		[command]="fg=#ad81fe,bold"              # text-accent
+		[builtin]="fg=#ad81fe"                   # text-accent
+		[alias]="fg=#ad81fe"                     # text-accent
+		[function]="fg=#e8deff"                  # text-accent-strong
+		[path]="fg=#edecf0,underline"            # text-primary
+		[single-quoted-argument]="fg=#a4a3ab"    # text-secondary
+		[double-quoted-argument]="fg=#a4a3ab"
+		[dollar-quoted-argument]="fg=#a4a3ab"
+		[unknown-token]="fg=#fd7d8b,bold"        # text-danger
+		[redirection]="fg=#a4a3ab"
+		[comment]="fg=#a4a3ab"
+		[named-fd]="fg=#a4a3ab"
+		[numeric-fd]="fg=#a4a3ab"
+	)
+	source "$_zp/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+fi
+
+# 3. History substring search — must come after syntax highlighting
+if [[ -r $_zp/zsh-history-substring-search/zsh-history-substring-search.zsh ]]; then
+	HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND="bg=#271a40,fg=#e8deff"     # the chosen-row wash
+	HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_NOT_FOUND="bg=#2e0f13,fg=#fd7d8b" # surface-danger, text-danger
+	HISTORY_SUBSTRING_SEARCH_GLOBBING_FLAGS="i"
+	source "$_zp/zsh-history-substring-search/zsh-history-substring-search.zsh"
+	bindkey '^[[A' history-substring-search-up
+	bindkey '^[[B' history-substring-search-down
+	bindkey '^[OA' history-substring-search-up
+	bindkey '^[OB' history-substring-search-down
+fi
+
+unset _zp
+
+# --- zoxide (last) -----------------------------------------------------------
+(( $+commands[zoxide] )) && eval "$(zoxide init zsh --cmd cd)" # replaces cd; `cdi` = interactive picker
+
+# --- Machine-specific settings, untracked -----------------------------------
+if [[ -r ~/.zshrc.local ]]; then
+	source ~/.zshrc.local
+fi

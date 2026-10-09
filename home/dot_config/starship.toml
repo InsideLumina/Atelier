@@ -1,0 +1,149 @@
+# Lumina prompt: three lines, grouped by when the information matters:
+#   1. toolchain (reference) ........ one quiet band, only inside a project
+#   2. where you are, what just ran . location and git on their tones; sudo, Docker
+#                                     and jobs as words; duration and failure on the right
+#   3. input ........................ the shell in the gutter (blank in zsh), then >
+# Tones, each with one job:
+#   toolchain ..... surface_subtle   quietest: context you rarely act on
+#   user@host ..... surface_pressed  over SSH or as root only
+#   directory ..... surface_chosen   the violet row wash: where you are
+#   git ........... surface_hover    neutral, between the two
+#   failure ....... surface_danger   the only rose surface
+# Assumes the terminal background is the Lumina page (#0d0c16).
+"$schema" = 'https://starship.rs/config-schema.json'
+add_newline = true
+palette = "lumina_dark"
+format = """
+($python$nodejs$rust
+)[==>](text_secondary) $username$hostname$directory$git_branch$git_status$git_state$sudo$docker_context$jobs$fill$cmd_duration$status
+$shell$character"""
+
+[python]
+symbol = "py "
+version_format = "${raw}"
+format = '[ $symbol$version( \($virtualenv\)) ]($style)'
+style = "fg:text_secondary bg:surface_subtle"
+
+[nodejs]
+symbol = "node "
+version_format = "${raw}"
+format = "[ $symbol$version ]($style)"
+style = "fg:text_secondary bg:surface_subtle"
+
+[rust]
+symbol = "rust "
+version_format = "${raw}"
+format = "[ $symbol($version) ]($style)"
+style = "fg:text_secondary bg:surface_subtle"
+
+[username]
+format = "[ $user@]($style)"
+style_user = "fg:text_primary bg:surface_pressed"
+style_root = "bold fg:text_danger bg:surface_pressed"
+
+[hostname]
+format = "[$hostname ]($style)"
+style = "fg:text_primary bg:surface_pressed"
+
+[directory]
+format = "[ $path$read_only ]($style)"
+style = "fg:text_accent_strong bg:surface_chosen"
+read_only = " read-only"
+read_only_style = "fg:text_danger bg:surface_chosen"
+truncation_length = 3
+truncation_symbol = "…/"
+# Inside a repo, lead with the repo name (up to 3 levels deep) so Atelier and Atelier-OLD never look alike
+repo_root_format = "[ $repo_root$path$read_only ]($style)"
+repo_root_style = "fg:text_accent_strong bg:surface_chosen" # must be set, or Starship ignores repo_root_format
+
+[git_branch]
+format = "[ $branch ]($style)"
+style = "fg:text_primary bg:surface_hover"
+
+[git_status]
+format = "([$all_status$ahead_behind]($style))"
+style = "fg:text_secondary bg:surface_hover"
+staged = "staged ${count} "
+modified = "modified ${count} "
+untracked = "new ${count} "
+deleted = "deleted ${count} "
+renamed = "renamed ${count} "
+conflicted = "conflict ${count} "
+stashed = ""
+ahead = "ahead ${count} "
+behind = "behind ${count} "
+diverged = "ahead ${ahead_count} behind ${behind_count} "
+
+[git_state]
+format = "[ $state( $progress_current/$progress_total) ]($style)"
+style = "fg:text_danger bg:surface_danger"
+rebase = "rebasing"
+merge = "merging"
+cherry_pick = "cherry-picking"
+revert = "reverting"
+bisect = "bisecting"
+am = "applying"
+am_or_rebase = "applying"
+
+# What changes the next command, as words only: cached sudo credentials (runs
+# `sudo -n true` each prompt), a non-local Docker context in a Docker project,
+# and suspended or background jobs.
+[sudo]
+disabled = false
+format = "[  sudo]($style)"
+style = "fg:text_warning"
+
+[docker_context]
+format = "[  docker $context]($style)"
+style = "fg:text_primary"
+
+[jobs]
+format = "[  jobs $number]($style)"
+style = "fg:text_secondary"
+symbol = ""
+number_threshold = 1
+symbol_threshold = 1
+
+[fill]
+symbol = " "
+
+[cmd_duration]
+format = "[took $duration ]($style)"
+style = "fg:text_secondary"
+
+[status]
+disabled = false
+format = "[ failed $status ]($style)"
+style = "fg:text_danger bg:surface_danger"
+
+# The shell fills the 4-column gutter under "==>": blank in zsh, named anywhere else
+[shell]
+disabled = false
+format = "[$indicator]($style)"
+style = "fg:text_secondary"
+zsh_indicator = "    "
+bash_indicator = "bash"
+fish_indicator = "fish"
+powershell_indicator = "pwsh"
+nu_indicator = "nu  "
+cmd_indicator = "cmd "
+unknown_indicator = "sh? "
+
+[character]
+success_symbol = " [>](bold text_accent)"
+error_symbol = " [>](bold text_danger)"
+vimcmd_symbol = " [<](bold text_accent)"
+
+# Lumina dark roles.
+[palettes.lumina_dark]
+text_primary = "#edecf0"
+text_secondary = "#a4a3ab"
+text_accent = "#ad81fe"
+text_accent_strong = "#e8deff"
+text_danger = "#fd7d8b"
+text_warning = "#e8bf54"
+surface_subtle = "#15131e"
+surface_hover = "#1d1b26"
+surface_pressed = "#22212c"
+surface_chosen = "#271a40"
+surface_danger = "#2e0f13"
