@@ -1,0 +1,11 @@
+{{- /* CI cannot answer prompts, so it gets a fake identity on a reserved domain. */ -}}
+{{- $name := "Atelier CI" -}}
+{{- $email := "ci@atelier.invalid" -}}
+{{- if not (env "CI" | not | not) -}}
+{{-   $name = promptStringOnce . "name" "Git user name" -}}
+{{-   $email = promptStringOnce . "email" "Git email address" -}}
+{{- end -}}
+
+[data]
+    name = {{ $name | quote }}
+    email = {{ $email | quote }}
