@@ -26,6 +26,12 @@ jobs:
       - name: Apply (first run)
         run: '"$HOME/.local/bin/chezmoi" apply --verbose --source "$GITHUB_WORKSPACE"'
 
+      # verify only sets the exit code, so diff runs first to print what differs.
+      - name: Verify the first run left nothing out of sync
+        run: |
+          "$HOME/.local/bin/chezmoi" diff --source "$GITHUB_WORKSPACE"
+          "$HOME/.local/bin/chezmoi" verify --source "$GITHUB_WORKSPACE"
+
       - name: Apply (second run must change nothing)
         run: '"$HOME/.local/bin/chezmoi" apply --verbose --source "$GITHUB_WORKSPACE"'
 
