@@ -2,3 +2,4 @@ packages:
   debian:
     - ripgrep
     - zsh
+    - bsdextrautils
