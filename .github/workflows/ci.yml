@@ -26,6 +26,15 @@ jobs:
       - name: Apply (first run)
         run: '"$HOME/.local/bin/chezmoi" apply --verbose --source "$GITHUB_WORKSPACE"'
 
+      - name: Apply (second run must change nothing)
+        run: '"$HOME/.local/bin/chezmoi" apply --verbose --source "$GITHUB_WORKSPACE"'
+
+      - name: Verify every target matches the source state
+        run: '"$HOME/.local/bin/chezmoi" verify --source "$GITHUB_WORKSPACE"'
+
+      - name: Git uses the CI identity
+        run: test "$(git config --global user.email)" = ci@atelier.invalid
+
       - name: Smoke check
         run: |
           rg --version
