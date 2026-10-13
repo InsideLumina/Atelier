@@ -8,6 +8,9 @@ jobs:
   debian:
     runs-on: ubuntu-latest
     container: debian:stable
+    env:
+      # The config template uses this to skip its prompts.
+      CI: "true"
     steps:
       - name: Install prerequisites
         run: apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git
@@ -17,7 +20,10 @@ jobs:
       - name: Install chezmoi
         run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
 
-      - name: Apply the checked-out source state
+      - name: Initialize chezmoi from the checkout
+        run: '"$HOME/.local/bin/chezmoi" init --source "$GITHUB_WORKSPACE"'
+
+      - name: Apply (first run)
         run: '"$HOME/.local/bin/chezmoi" apply --verbose --source "$GITHUB_WORKSPACE"'
 
       - name: Smoke check
