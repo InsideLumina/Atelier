@@ -3,3 +3,7 @@ packages:
     - ripgrep
     - zsh
     - bsdextrautils
+  rhel:
+    - ripgrep
+    - zsh
+    - util-linux

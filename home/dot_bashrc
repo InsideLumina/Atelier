@@ -115,6 +115,12 @@ fi
 # --- Lumina Atelier ----------------------------------------------------------
 # Everything above is Debian's stock /etc/skel/.bashrc, kept as is.
 # PATH, mise, environment and aliases shared with zsh live in common.sh.
+
+# AlmaLinux's stock .bashrc loads the system-wide defaults from here, so keep doing that
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+
 if [ -r ~/.config/shell/common.sh ]; then
     . ~/.config/shell/common.sh
 fi

@@ -51,3 +51,50 @@ jobs:
           set -e
           zsh -i -c 'command -v starship && alias gs'
           bash -i -c 'command -v starship && alias gs'
+
+  almalinux:
+    runs-on: ubuntu-latest
+    container: almalinux:9
+    env:
+      # The config template uses this to skip its prompts.
+      CI: "true"
+    steps:
+      - name: Install prerequisites
+        run: dnf install -y git # curl-minimal ships with the image
+
+      - uses: actions/checkout@v7
+
+      - name: Install chezmoi
+        run: sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
+
+      - name: Initialize chezmoi from the checkout
+        run: '"$HOME/.local/bin/chezmoi" init --source "$GITHUB_WORKSPACE"'
+
+      - name: Apply (first run)
+        run: '"$HOME/.local/bin/chezmoi" apply --verbose --source "$GITHUB_WORKSPACE"'
+
+      # verify only sets the exit code, so diff runs first to print what differs.
+      - name: Verify the first run left nothing out of sync
+        run: |
+          "$HOME/.local/bin/chezmoi" diff --source "$GITHUB_WORKSPACE"
+          "$HOME/.local/bin/chezmoi" verify --source "$GITHUB_WORKSPACE"
+
+      - name: Apply (second run must change nothing)
+        run: '"$HOME/.local/bin/chezmoi" apply --verbose --source "$GITHUB_WORKSPACE"'
+
+      - name: Verify every target matches the source state
+        run: '"$HOME/.local/bin/chezmoi" verify --source "$GITHUB_WORKSPACE"'
+
+      - name: Git uses the CI identity
+        run: test "$(git config --global user.email)" = ci@atelier.invalid
+
+      - name: Smoke check
+        run: |
+          rg --version
+          "$HOME/.local/bin/mise" exec -- node --version
+
+      - name: Shells find Starship and the shared aliases
+        run: |
+          set -e
+          zsh -i -c 'command -v starship && alias gs'
+          bash -i -c 'command -v starship && alias gs'

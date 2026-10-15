@@ -14,5 +14,15 @@ fi
 
 $sudo apt-get update
 $sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y {{ .packages.debian | join " " }}
+{{    else if contains "rhel" $idLike -}}
+#!/bin/sh
+set -eu
+
+sudo=""
+if [ "$(id -u)" -ne 0 ]; then
+	sudo="sudo"
+fi
+
+$sudo dnf install -y {{ .packages.rhel | join " " }}
 {{    end -}}
 {{- end -}}
