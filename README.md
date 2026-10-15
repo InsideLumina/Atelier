@@ -8,7 +8,7 @@ Configuration that takes a fresh machine to a working development setup with one
 
 Atelier is a configuration repository for [chezmoi](https://www.chezmoi.io). It installs system packages, installs runtimes and command-line tools through [mise](https://mise.jdx.dev), and writes shell, prompt and Git configuration into the home directory. It has no installer of its own: chezmoi, mise and the system package manager do the work.
 
-Atelier works today on Debian, including Debian on WSL. AlmaLinux, macOS and Windows are planned.
+Atelier works today on Debian, including Debian on WSL, and on AlmaLinux 9. macOS and Windows are planned.
 
 ## Before you run it
 
@@ -16,17 +16,25 @@ When it runs, Atelier:
 
 - Replaces these files in your home directory: `~/.bashrc`, `~/.zshrc`, `~/.gitconfig`, `~/.config/shell/common.sh`, `~/.config/starship.toml` and `~/.config/mise/config.toml`. Back up any of them you want to keep.
 - Downloads three zsh plugins into `~/.local/share/zsh/plugins`.
-- Installs `ripgrep`, `zsh` and `bsdextrautils` with `apt-get`, through `sudo` when you are not root.
+- Installs system packages through `sudo` when you are not root. On Debian, it installs `ripgrep`, `zsh` and `bsdextrautils` with `apt-get`. On AlmaLinux, it first enables the EPEL and CRB repositories for the whole system, then installs `ripgrep`, `zsh` and `util-linux` with `dnf`.
 - Installs mise into `~/.local/bin`, then uses mise to install Node.js, Starship, `bat`, `fd`, `eza`, `fzf`, `zoxide` and Neovim.
 - Does not change your login shell.
 - Does not handle secrets yet. Which password manager will supply them is still an open decision; see [ADR 0003](docs/adr/0003-secrets.md).
 
 ## Install
 
-You need `curl` and `git`, plus `sudo` if you are not root:
+You need `curl` and `git`, plus `sudo` if you are not root.
+
+On Debian:
 
 ```sh
 sudo apt-get install -y curl git
+```
+
+On AlmaLinux, `curl` is already installed:
+
+```sh
+sudo dnf install -y git
 ```
 
 ### Cautious path
@@ -65,7 +73,7 @@ Whichever path you take, open a new terminal afterward so the new shell configur
 chezmoi update
 ```
 
-This pulls the latest changes from GitHub and applies them. chezmoi rewrites any file whose source changed, and downloads the zsh plugins again at most once a week. The package script runs again only when the package list changes, and the mise script runs again only when the mise configuration changes. chezmoi asks for your name and email address only once, during the first `init`.
+This pulls the latest changes from GitHub and applies them. chezmoi rewrites any file whose source changed, and downloads the zsh plugins again at most once a week. The script that enables extra repositories runs once per machine, and again only if the script itself changes. The package script runs again only when the package list changes, and the mise script runs again only when the mise configuration changes. chezmoi asks for your name and email address only once, during the first `init`.
 
 ## Local overrides
 
@@ -75,9 +83,9 @@ This pulls the latest changes from GitHub and applies them. chezmoi rewrites any
 
 - `home/` is what chezmoi applies. The `.chezmoiroot` file points chezmoi at it, so nothing outside `home/` is applied to a machine.
 - `home/.chezmoidata/packages.yaml` lists system packages for each platform.
-- `home/.chezmoiscripts/` holds the scripts that install packages and run mise.
+- `home/.chezmoiscripts/` holds the scripts that enable extra package repositories, install packages and run mise.
 - `home/dot_config/mise/config.toml` lists the runtimes and tools mise installs.
-- `.github/workflows/ci.yml` applies Atelier in a clean container on every push and checks the result.
+- `.github/workflows/ci.yml` applies Atelier in clean Debian and AlmaLinux containers on every push and checks the result.
 - [`docs/pitch.md`](docs/pitch.md) describes the problem and the scope, and [`docs/adr/`](docs/adr/) records the design decisions.
 
 ## How Atelier is built
